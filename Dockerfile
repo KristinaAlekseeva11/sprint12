@@ -2,15 +2,15 @@
     FROM golang:1.22 AS builder
     WORKDIR /app
     
-    # сначала зависимости
-    COPY go.mod go.sum ./
-    RUN go mod download
+    # стабильные сетевые настройки для модулей
+    ENV CGO_ENABLED=0 \
+        GOPROXY=https://proxy.golang.org,direct \
+        GOSUMDB=sum.golang.org
     
-    # теперь исходники
+    # копируем весь проект сразу (go.mod/go.sum тоже попадут)
     COPY . .
     
-    # modernc.org/sqlite не требует CGO
-    ENV CGO_ENABLED=0
+    # сборка; go сам вытянет зависимости
     RUN go build -v -o server .
     
     # ---- run stage ----
@@ -18,4 +18,5 @@
     WORKDIR /app
     COPY --from=builder /app/server .
     COPY tracker.db ./tracker.db
-    CMD ["./server"]    
+    CMD ["./server"]
+     
