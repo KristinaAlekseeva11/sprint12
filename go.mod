@@ -1,4 +1,4 @@
-module github.com/KristinaAlekseeva11/sprint12
+module github.com/KristinaAlekseeva11/12sprint
 
 go 1.24.2
 
