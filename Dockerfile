@@ -2,14 +2,11 @@
     FROM golang:1.22 AS builder
     WORKDIR /app
     
-    # кладём манифесты и vendor внутрь образа
-    COPY go.mod go.sum ./
-    COPY vendor ./vendor
-    # копируем исходники
+    # скопируем всё сразу (исходники + go.mod/go.sum)
     COPY . .
     
-    # собираем, используя vendor (без сети)
-    RUN go build -mod=vendor -o server main.go
+    # соберём main.go напрямую
+    RUN go build -o server main.go
     
     # ------- run stage -------
     FROM alpine:3.20
