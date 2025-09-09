@@ -1,25 +1,21 @@
-# -------- build stage (CGO + vendor) --------
+# ---- build stage (modernc.org/sqlite => CGO off) ----
     FROM golang:1.22 AS builder
     WORKDIR /app
     
-    # для sqlite нужен gcc
-    RUN apt-get update && apt-get install -y --no-install-recommends gcc ca-certificates && rm -rf /var/lib/apt/lists/*
-    
-    # кладём манифесты и vendor
+    # сначала зависимости
     COPY go.mod go.sum ./
-    COPY vendor ./vendor
+    RUN go mod download
     
-    # кладём исходники
+    # теперь исходники
     COPY . .
     
-    # включаем CGO и собираем, используя vendor (без сетевых скачиваний)
-    ENV CGO_ENABLED=1
-    RUN go build -mod=vendor -o server .
+    # modernc.org/sqlite не требует CGO
+    ENV CGO_ENABLED=0
+    RUN go build -v -o server .
     
-    # -------- run stage --------
+    # ---- run stage ----
     FROM alpine:3.20
     WORKDIR /app
     COPY --from=builder /app/server .
     COPY tracker.db ./tracker.db
-    CMD ["./server"]
-       
+    CMD ["./server"]    
