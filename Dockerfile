@@ -10,3 +10,4 @@ WORKDIR /app
 COPY --from=builder /app/server .
 COPY tracker.db ./tracker.db
 CMD ["./server"]
+
